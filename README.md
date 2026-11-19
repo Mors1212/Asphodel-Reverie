@@ -96,6 +96,9 @@ The library covers, the persona covers and the avatar behind each message are la
        avatar:
          - 864
          - 1280
+       persona:
+         - 864
+         - 1280
    ```
 2. Delete the folder `data/default-user/thumbnails` inside your SillyTavern folder. SillyTavern makes it again by itself, with the new size.
 
