@@ -7,7 +7,7 @@
     "css": "style.css",
     "author": "Mors",
     "version": "1.1.0",
-    "homePage": "",
+    "homePage": "https://github.com/Mors1212/Asphodel-Reverie",
     "description": "A standalone theme: Whisper chat style, magazine-cover character library and persona pages, tidier toolbars, shareable theme presets, and switchable notification styles.",
     "license": "AGPL-3.0"
 }
