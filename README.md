@@ -110,7 +110,13 @@ Termux's files are hidden from most file managers. This command, typed in Termux
 am start --user 0 -n com.google.android.documentsui/com.android.documentsui.files.FilesActivity
 ```
 
-In the Files app, open the side menu and choose **Termux** at the very bottom, then go to the `SillyTavern` folder. From there you can open `config.yaml` with a text editor app (for example, txtpad) and delete the thumbnails folder.
+In the Files app, open the side menu and choose **Termux** at the very bottom, then go to the `SillyTavern` folder. From there you can open `config.yaml` with a text editor app (for example, txtpad).
+
+To delete the thumbnails folder, type this in Termux (if SillyTavern is installed in `~/SillyTavern`):
+
+```
+rm -rf ~/SillyTavern/data/default-user/thumbnails
+```
 
 ### 3. Restart SillyTavern
 
