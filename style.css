@@ -1,0 +1,1579 @@
+/* =====================================================
+   ASPHODEL REVERIE
+   Asphodel Reverie's own pages and controls. Loads after moonlit-base.css
+   (the base layer taken from Moonlit Echoes), so these rules win where they overlap.
+
+   body.mg-lib      library cards   (list + magazine grid)
+   body.mg-persona  persona cards   (magazine grid, pinning)
+   body.mg-tools    tidy toolbars
+   body.mg-home     welcome / home screen
+   body.mg-font     interface text locked at scale 1; chat follows the Font Scale slider
+   body.mg-panel-bg    function-panel background   (only if Custom CSS sets --function-bg)
+   body.mg-panel-slider  slider thumb picture     (only if Custom CSS sets --function-slider-icon or --function-control-icon)
+   body.mg-panel-check   checked checkbox picture (only if Custom CSS sets --function-checkbox-icon or --function-control-icon)
+   body.mg-topbar      top-bar layout for picture icons (only if a --topbar-icon-* is set)
+   .mg-icon            put on each button whose picture is set in Custom CSS
+   One "Enable" switch in the extension settings sets all of them.
+   ===================================================== */
+
+/* ---------- TUNE HERE ---------- */
+
+body {
+    --mg-serif: Georgia, "Times New Roman", serif;
+    --mg-mono: ui-monospace, "SFMono-Regular", "Roboto Mono", Menlo, Consolas, monospace;
+
+    /* list cards */
+    --mg-list-h: 132px;                         /* card height */
+    --mg-list-avatar-w: 108px;                  /* picture width */
+    --mg-list-name-size: 17px;
+    --mg-index-color: rgba(220, 222, 214, 0.055); /* the big 01, 02 … */
+
+    /* grid cards */
+    --mg-grid-cols: 3;                          /* set from the settings panel */
+    --mg-grid-ratio: 2 / 3;
+    --mg-grid-name-size: 15px;
+
+    /* shared */
+    --mg-card-bg: rgba(18, 20, 19, 0.90);
+    --mg-line: rgba(190, 194, 184, 0.20);
+    --mg-accent: var(--customThemeColor, #b3352c);
+    --mg-accent-text: color-mix(in srgb, var(--mg-accent) 50%, #ffe3dd);
+}
+
+
+/* =====================================================
+   1. CHARACTER LIBRARY — LIST
+   ===================================================== */
+
+body.mg-lib:not(.charListGrid) #rm_print_characters_block {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)) !important;
+    grid-auto-rows: max-content !important;
+    align-content: start !important;
+    gap: 10px !important;
+    padding: 8px !important;
+    counter-reset: mg-index;
+}
+
+body.mg-lib #rm_print_characters_block > .text_block {
+    grid-column: 1 / -1;
+}
+
+/* card */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) {
+    position: relative !important;
+    isolation: isolate;
+    display: grid !important;
+    grid-template-columns: var(--mg-list-avatar-w) minmax(0, 1fr) !important;
+    align-items: stretch !important;
+
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: var(--mg-list-h) !important;
+    min-height: var(--mg-list-h) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    background: var(--mg-card-bg) !important;
+    border: 1px solid var(--mg-line) !important;
+    border-image: none !important;
+    border-radius: 5px !important;
+    outline: none !important;
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.28),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.025) !important;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+
+    counter-increment: mg-index;
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background-color 0.18s ease,
+        box-shadow 0.18s ease !important;
+}
+
+/* paper texture */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.09;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.48'/%3E%3C/svg%3E");
+    mix-blend-mode: soft-light;
+}
+
+/* index number */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select)::after {
+    content: counter(mg-index, decimal-leading-zero);
+    position: absolute;
+    top: 8px;
+    right: 15px;
+    z-index: 4;
+    font-family: var(--mg-serif);
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--mg-index-color);
+    pointer-events: none;
+    user-select: none;
+    transition: color 0.18s ease !important;
+}
+
+/* avatar */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) > .avatar {
+    position: relative !important;
+    z-index: 2 !important;
+    display: block !important;
+
+    width: var(--mg-list-avatar-w) !important;
+    min-width: var(--mg-list-avatar-w) !important;
+    max-width: var(--mg-list-avatar-w) !important;
+    height: var(--mg-list-h) !important;
+    min-height: var(--mg-list-h) !important;
+    max-height: var(--mg-list-h) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    border: 0 !important;
+    border-right: 1px solid rgba(205, 208, 198, 0.12) !important;
+    border-radius: 0 !important;
+    border-image: none !important;
+    outline: none !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    align-self: stretch !important;
+}
+
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) > .avatar:not(.avatar_collage) > img {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: cover !important;
+    object-position: center 20% !important;
+    border: 0 !important;
+    border-image: none !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transition: transform 0.25s ease, filter 0.25s ease !important;
+}
+
+/* info area */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) :is(.character_select_container, .group_select_container) {
+    position: relative !important;
+    z-index: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 15px 48px 15px 18px !important;
+    overflow: hidden !important;
+    text-align: left !important;
+}
+
+/* right-side archive line */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) :is(.character_select_container, .group_select_container)::after {
+    content: "";
+    position: absolute;
+    top: 17px;
+    right: 12px;
+    bottom: 17px;
+    width: 1px;
+    background: rgba(205, 208, 198, 0.10);
+    pointer-events: none;
+}
+
+/* name */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) .character_name_block {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) .ch_name {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+
+    font-family: var(--mg-serif) !important;
+    font-size: var(--mg-list-name-size) !important;
+    font-weight: 400 !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.012em !important;
+    color: var(--SmartThemeBodyColor) !important;
+    text-align: left !important;
+    text-shadow: none !important;
+}
+
+/* hidden details */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .character_select :is(
+    .ch_description,
+    .character_name_block_sub_line,
+    .character_version,
+    .ch_additional_info,
+    .ch_avatar_url
+) {
+    display: none !important;
+}
+
+/* tags */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) .tags_inline {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 8px 0 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+}
+
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) .tags_inline .tag {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+    font-size: 8px !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.11em !important;
+    text-transform: uppercase !important;
+    color: var(--SmartThemeEmColor) !important;
+}
+
+body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select) .tags_inline .tag:not(:last-child)::after {
+    content: "·";
+    display: inline-block;
+    margin: 0 6px;
+    color: rgba(205, 208, 198, 0.22);
+}
+
+/* --- group chats: same card, two lines (name + member count) --- */
+
+/* collage avatar (groups without their own picture): the member portraits are
+   laid out as tiles that exactly fill the picture slot, like the grid cover.
+   Tiles are placed by how many pictures there are (1–4). */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img {
+    position: absolute !important;
+    display: block !important;
+    inset: auto !important;
+    width: 50% !important;
+    height: 50% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    object-fit: cover !important;
+    object-position: center 15% !important;
+    border: 0 !important;
+    border-image: none !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+/* positions: 1 = top-left, 2 = top-right, 3 = bottom-left, 4 = bottom-right */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img:nth-child(1) { left: 0 !important;   top: 0 !important; }
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img:nth-child(2) { left: 50% !important; top: 0 !important; }
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img:nth-child(3) { left: 0 !important;   top: 50% !important; }
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img:nth-child(4) { left: 50% !important; top: 50% !important; }
+
+/* one picture: whole slot */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img:only-child {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* two pictures: side by side, full height */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img:nth-last-child(2):first-child,
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img:nth-last-child(1):nth-child(2) {
+    height: 100% !important;
+}
+
+/* three pictures: two on top, the third spans the bottom */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img:nth-last-child(1):nth-child(3) {
+    width: 100% !important;
+}
+
+/* hairline between the tiles */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage {
+    background: #0b0c0c !important;
+}
+
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select > .avatar.avatar_collage > img:not(:only-child) {
+    box-shadow: 0 0 0 0.5px rgba(8, 8, 10, 0.9) !important;
+}
+
+/* line 2: "N characters" */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select .group_select_counter {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 8px 0 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+
+    font-family: inherit !important;
+    font-size: 8px !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.11em !important;
+    text-transform: uppercase !important;
+    color: var(--SmartThemeEmColor) !important;
+    text-align: left !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
+}
+
+/* no member names, tags or star */
+body.mg-lib:not(.charListGrid) #rm_print_characters_block .group_select :is(
+    .group_select_block_list,
+    .ch_description,
+    .character_name_block_sub_line,
+    .tags,
+    .tags_inline,
+    .group_fav_icon,
+    .ch_fav_icon,
+    .ch_avatar_url
+) {
+    display: none !important;
+}
+
+/* favourites look like everyone else */
+body.mg-lib #rm_print_characters_block :is(.character_select, .group_select).is_fav .ch_name {
+    color: var(--SmartThemeBodyColor) !important;
+    text-shadow: none !important;
+}
+
+/* hover */
+@media (hover: hover) {
+    body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select):hover {
+        transform: translateY(-2px) !important;
+        background: rgba(22, 24, 23, 0.93) !important;
+        border-color: rgba(210, 214, 202, 0.32) !important;
+        outline: none !important;
+        filter: none !important;
+        box-shadow:
+            0 8px 22px rgba(0, 0, 0, 0.30),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.035) !important;
+    }
+
+    body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select):hover > .avatar:not(.avatar_collage) > img {
+        transform: scale(1.025) !important;
+    }
+
+    body.mg-lib:not(.charListGrid) #rm_print_characters_block :is(.character_select, .group_select):hover::after {
+        color: rgba(220, 222, 214, 0.09);
+    }
+}
+
+@media (max-width: 700px) {
+    body.mg-lib:not(.charListGrid) #rm_print_characters_block {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
+/* =====================================================
+   2. CHARACTER LIBRARY — GRID (magazine covers)
+   ===================================================== */
+
+body.mg-lib.charListGrid #rm_print_characters_block {
+    display: grid !important;
+    grid-template-columns: repeat(var(--mg-grid-cols), minmax(0, 1fr)) !important;
+    /* rows keep their full height even when the list has to scroll */
+    grid-auto-rows: max-content !important;
+    align-content: start !important;
+    gap: 8px !important;
+    padding: 8px !important;
+    counter-reset: mg-issue;
+}
+
+/* cover */
+body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select, .bogus_folder_select) {
+    position: relative !important;
+    isolation: isolate;
+    display: block !important;
+    flex: none !important;
+
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: auto !important;
+    aspect-ratio: var(--mg-grid-ratio);
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    background: #121314 !important;
+    border: 0 !important;
+    border-radius: 2px !important;
+    outline: none !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30) !important;
+
+    transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+}
+
+body.mg-lib.charListGrid #rm_print_characters_block > .character_select {
+    counter-increment: mg-issue;
+}
+
+/* picture fills the cover */
+body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select, .bogus_folder_select) > .avatar {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    display: block !important;
+
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select) > .avatar:not(.avatar_collage) > img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center 20% !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transition: transform 0.25s ease !important;
+}
+
+/* folders show their icon in the middle */
+body.mg-lib.charListGrid #rm_print_characters_block > .bogus_folder_select > .avatar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 26px;
+}
+
+/* dark fade behind the masthead label */
+body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select, .bogus_folder_select)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(rgba(8, 8, 10, 0.60), rgba(8, 8, 10, 0) 28%);
+}
+
+/* masthead label */
+body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select, .bogus_folder_select)::after {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    text-align: center;
+    font-family: var(--mg-mono);
+    font-size: 8px;
+    line-height: 1;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    color: rgba(233, 227, 215, 0.85);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+    user-select: none;
+}
+
+body.mg-lib.charListGrid #rm_print_characters_block > .character_select::after {
+    content: "ISSUE " counter(mg-issue, decimal-leading-zero);
+}
+
+body.mg-lib.charListGrid #rm_print_characters_block > .group_select::after {
+    content: "GROUP";
+}
+
+body.mg-lib.charListGrid #rm_print_characters_block > .bogus_folder_select::after {
+    content: "FOLDER";
+}
+
+/* name over the bottom fade */
+body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select, .bogus_folder_select) > :is(.character_select_container, .group_select_container) {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    z-index: 3 !important;
+    display: block !important;
+
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 34px 6px 9px !important;
+
+    background: linear-gradient(rgba(8, 8, 10, 0), rgba(8, 8, 10, 0.94)) !important;
+    text-align: center !important;
+}
+
+body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select, .bogus_folder_select) .character_name_block {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select, .bogus_folder_select) .ch_name {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden !important;
+
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+
+    font-family: var(--mg-serif) !important;
+    font-size: var(--mg-grid-name-size) !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0.01em !important;
+    color: var(--SmartThemeBodyColor) !important;
+    text-align: center !important;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85) !important;
+}
+
+/* no favourite symbol in front of the name */
+body.mg-lib #rm_print_characters_block :is(.character_select, .group_select).is_fav .ch_name::before {
+    content: none !important;
+}
+
+/* name + picture only */
+body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select, .bogus_folder_select) :is(
+    .ch_description,
+    .tags_inline,
+    .ch_additional_info,
+    .character_name_block_sub_line,
+    .ch_fav_icon,
+    .group_fav_icon,
+    .ch_assistant,
+    .group_select_block_list
+) {
+    display: none !important;
+}
+
+@media (hover: hover) {
+    body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select, .bogus_folder_select):hover {
+        transform: translateY(-2px) !important;
+        filter: none !important;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.36) !important;
+    }
+
+    body.mg-lib.charListGrid #rm_print_characters_block > :is(.character_select, .group_select):hover > .avatar:not(.avatar_collage) > img {
+        transform: scale(1.03) !important;
+    }
+}
+
+/* bulk edit: checkbox sits in the corner instead of breaking the card */
+body.mg-lib #rm_print_characters_block .character_select > .bulk_select_checkbox {
+    position: absolute !important;
+    top: 6px !important;
+    left: 6px !important;
+    z-index: 6 !important;
+    margin: 0 !important;
+}
+
+body.mg-lib #rm_print_characters_block .character_select.character_selected {
+    outline: 1px solid var(--mg-accent) !important;
+    outline-offset: -1px;
+}
+
+
+/* =====================================================
+   3. PERSONA — always a grid of magazine covers
+   (SillyTavern's own list/grid toggle is hidden; see TOOLBARS)
+   ===================================================== */
+
+body.mg-persona #user_avatar_block {
+    display: grid !important;
+    grid-template-columns: repeat(var(--mg-grid-cols), minmax(0, 1fr)) !important;
+    grid-auto-rows: max-content !important;
+    align-content: start !important;
+    gap: 8px !important;
+    padding: 8px 0 !important;
+}
+
+body.mg-persona #user_avatar_block > .avatar_upload {
+    grid-column: 1 / -1;
+    justify-self: center;
+}
+
+/* cover */
+body.mg-persona #user_avatar_block > .avatar-container {
+    position: relative !important;
+    isolation: isolate;
+    display: block !important;
+    flex: none !important;
+
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: auto !important;
+    aspect-ratio: var(--mg-grid-ratio);
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    background: #121314 !important;
+    border: 1px solid transparent !important;
+    border-radius: 2px !important;
+    outline: none !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30) !important;
+    filter: none !important;
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease !important;
+}
+
+/* picture fills the cover */
+body.mg-persona #user_avatar_block > .avatar-container > .avatar {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    display: block !important;
+    flex: none !important;
+
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+body.mg-persona #user_avatar_block > .avatar-container > .avatar > img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center 20% !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+/* name over the bottom fade */
+body.mg-persona #user_avatar_block > .avatar-container > .character_select_container {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    z-index: 3 !important;
+    display: block !important;
+
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 34px 6px 9px !important;
+
+    background: linear-gradient(rgba(8, 8, 10, 0), rgba(8, 8, 10, 0.94)) !important;
+    text-align: center !important;
+}
+
+body.mg-persona #user_avatar_block > .avatar-container .character_name_block {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.mg-persona #user_avatar_block > .avatar-container .ch_name {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden !important;
+
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+
+    font-family: var(--mg-serif) !important;
+    font-size: var(--mg-grid-name-size) !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0.01em !important;
+    color: var(--SmartThemeBodyColor) !important;
+    text-align: center !important;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85) !important;
+}
+
+/* name + picture only */
+body.mg-persona #user_avatar_block > .avatar-container :is(.ch_description, .ch_additional_info) {
+    display: none !important;
+}
+
+/* the persona in use: red frame corners + ACTIVE */
+body.mg-persona #user_avatar_block > .avatar-container.selected {
+    border-color: var(--mg-accent) !important;
+}
+
+body.mg-persona #user_avatar_block > .avatar-container.selected::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background:
+        linear-gradient(var(--mg-accent), var(--mg-accent)) left 5px top 5px / 16px 2px no-repeat,
+        linear-gradient(var(--mg-accent), var(--mg-accent)) left 5px top 5px / 2px 16px no-repeat,
+        linear-gradient(var(--mg-accent), var(--mg-accent)) right 5px bottom 5px / 16px 2px no-repeat,
+        linear-gradient(var(--mg-accent), var(--mg-accent)) right 5px bottom 5px / 2px 16px no-repeat;
+}
+
+body.mg-persona #user_avatar_block > .avatar-container.selected .character_name_block::before {
+    content: "● ACTIVE";
+    display: block;
+    margin-bottom: 6px;
+    font-family: var(--mg-mono);
+    font-size: 8px;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    color: var(--mg-accent-text);
+}
+
+/* the default persona gets a quiet label under its name */
+body.mg-persona #user_avatar_block > .avatar-container.default_persona .character_name_block::after {
+    content: "DEFAULT";
+    display: block;
+    margin-top: 6px;
+    font-family: var(--mg-mono);
+    font-size: 8px;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: 0.2em;
+    color: var(--SmartThemeEmColor);
+}
+
+/* chat / character lock badges: icons only, under the name */
+body.mg-persona #user_avatar_block > .avatar-container .avatar_container_states {
+    display: flex !important;
+    flex: none !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    margin: 5px 0 0 !important;
+    padding: 0 !important;
+}
+
+body.mg-persona #user_avatar_block > .avatar-container .avatar_container_states .menu_button {
+    margin: 0 !important;
+    padding: 2px 4px !important;
+    font-size: 10px !important;
+}
+
+body.mg-persona #user_avatar_block > .avatar-container .avatar_container_states .label {
+    display: none !important;
+}
+
+/* ----- pinned personas: first in the grid, with a pin mark ----- */
+
+body.mg-persona #user_avatar_block > .avatar-container.mg-pinned {
+    order: -1;
+}
+
+body.mg-persona #user_avatar_block > .avatar-container.mg-pinned::after {
+    content: "\f08d";
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    z-index: 4;
+    font-family: "Font Awesome 6 Free";
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--SmartThemeBodyColor);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+}
+
+/* pin mode: every cover shows it can be tapped */
+body.mg-persona.mg-pin-mode #user_avatar_block > .avatar-container {
+    outline: 1px dashed rgba(233, 227, 215, 0.55) !important;
+    outline-offset: -4px;
+}
+
+body.mg-persona.mg-pin-mode #user_avatar_block > .avatar-container:not(.mg-pinned) > .avatar {
+    opacity: 0.55;
+}
+
+@media (hover: hover) {
+    body.mg-persona #user_avatar_block > .avatar-container:hover {
+        transform: translateY(-2px) !important;
+        filter: none !important;
+    }
+}
+
+
+/* ----- Current Persona header: name on its own row; buttons + More share the next ----- */
+
+body.mg-persona #persona_controls {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px 6px !important;
+}
+
+body.mg-persona #persona_controls > .persona_name {
+    order: 1;
+    flex: 1 0 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+body.mg-persona #persona_controls > .persona_controls_buttons_block {
+    order: 2;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+}
+
+body.mg-persona #persona_controls > label {
+    order: 3;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    height: auto !important;
+}
+
+body.mg-persona #persona_controls > label > select {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+
+/* =====================================================
+   4. TOOLBARS
+   ===================================================== */
+
+/* ----- library: grid toggle + bulk edit sit on the filter-icon row ----- */
+
+body.mg-tools #charListFixedTop .rm_tag_controls {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+}
+
+body.mg-tools #charListFixedTop .rm_tag_controls > .rm_tag_filter {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    order: 0;
+}
+
+body.mg-tools #charListFixedTop .rm_tag_controls > .mg-lib-tools {
+    order: 1;
+    flex: none;
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+}
+
+body.mg-tools #charListFixedTop .rm_tag_controls > .mg-lib-tools .menu_button {
+    margin: 0 !important;
+    padding: 4px 5px;
+}
+
+body.mg-tools #charListFixedTop .rm_tag_controls > .rm_tag_bogus_drilldown {
+    order: 2;
+    flex: 1 0 100%;
+}
+
+body.mg-tools #charListFixedTop .rm_tag_controls > .rm_tag_bogus_drilldown:empty {
+    display: none !important;
+}
+
+/* ----- persona: pin button joins Create / Search / Sort; pages get their own row ----- */
+
+body.mg-tools #persona-management-block .persona_management_left_column > .flex-container:first-child {
+    flex-wrap: wrap !important;
+    align-items: center !important;
+}
+
+body.mg-tools #persona_search_bar {
+    flex: 1 1 60px !important;
+    min-width: 0 !important;
+}
+
+/* the persona page is always a grid, so the toggle goes; the pin button takes its place */
+body.mg-persona #persona_grid_toggle {
+    display: none !important;
+}
+
+#mg_persona_pin {
+    order: 3;
+    margin: 0 !important;
+}
+
+body:not(.mg-persona) #mg_persona_pin {
+    display: none !important;
+}
+
+#mg_persona_pin.mg-active {
+    color: var(--mg-accent-text) !important;
+    border-color: var(--mg-accent) !important;
+}
+
+body.mg-tools #persona_pagination_container {
+    order: 4;
+    flex: 1 0 100% !important;
+}
+
+/* ----- persona header: icon-only buttons beside the title on narrow screens ----- */
+
+@media (max-width: 700px) {
+    body.mg-tools #PersonaManagement > .flex-container > .flex-container.alignItemsBaseline {
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+    }
+
+    body.mg-tools #PersonaManagement :is(.user_stats_button, #personas_backup, #personas_restore) > span {
+        display: none !important;
+    }
+
+    body.mg-tools #PersonaManagement :is(.user_stats_button, #personas_backup, #personas_restore) {
+        margin: 0 !important;
+    }
+}
+
+
+/* =====================================================
+   5. USER SETTINGS — Custom CSS editor moved up on phones
+   (index.js moves it below Theme Colors; this keeps it full width)
+   ===================================================== */
+
+@media (max-width: 760px) {
+    #CustomCSS-block[data-mg-relocated="true"],
+    #CustomCSS-block[data-mg-relocated="true"] #CustomCSS-textAreaBlock,
+    #CustomCSS-block[data-mg-relocated="true"] #customCSS {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+}
+
+
+/* =====================================================
+   6. EXTENSION SETTINGS PANEL (same layout as Mors's Music Box)
+   ===================================================== */
+
+/* layout lives on an inner wrapper: the drawer itself must stay under ST's open/close control */
+.mg-settings .mg-set-body { display: flex; flex-direction: column; gap: 8px; }
+.mg-set-row { display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; }
+.mg-set-row > label { flex: none; margin: 0; }
+.mg-set-row > select { flex: 1; min-width: 0; margin: 0; }
+.mg-set-tools { flex-wrap: wrap; justify-content: center; gap: 4px; }
+.mg-set-tools .menu_button { margin: 0; }
+.mg-set-tools .menu_button.mg-locked { opacity: .35; }
+.mg-set-row > input[type="text"] { flex: 1; min-width: 0; margin: 0; }
+.mg-set-state { text-align: center; font-size: 12px; line-height: 1.3; color: var(--customThemeColor2, var(--SmartThemeQuoteColor)); }
+
+/* theme preset colours: name, hint, then swatch + hex + opacity on one row */
+.mg-set-colors { display: flex; flex-direction: column; gap: 12px; }
+.mg-color { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mg-color > small { opacity: .7; line-height: 1.3; }
+.mg-color-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.mg-color-pick { flex: none; }
+.mg-color-hex { flex: 1 1 0; min-width: 0; margin: 0; }
+.mg-color-alpha { flex: 1 1 0; min-width: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.mg-color-alpha > span { font-size: 12px; opacity: .7; }
+.mg-color-alpha > input { width: 100%; margin: 0; }
+.mg-color-num { flex: none; width: 2.2em; text-align: right; }
+
+/* chat avatar: width + position share one row */
+.mg-set-avatar > input[type="text"] { flex: 0 0 4.2em; text-align: center; }
+
+.mg-set-note { text-align: center; color: #aaa; opacity: .7; font-size: 12px; line-height: 1.3; padding-top: 6px; }
+
+/* notification style editor */
+.mg-css-editor { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.mg-css-editor h3 { margin: 0; }
+.mg-css-hint { margin: 0; font-size: .85em; opacity: .7; }
+.mg-css-name { width: 100%; margin: 0; }
+.mg-css-text {
+    width: 100%;
+    min-height: 50vh;
+    margin: 0;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.45;
+    white-space: pre;
+    overflow: auto;
+    resize: vertical;
+    tab-size: 2;
+}
+.mg-css-error { color: #e06a6a; font-size: .9em; }
+
+/* fallback editor window, only used on SillyTavern versions without the built-in popup */
+.mg-css-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.6);
+}
+.mg-css-card {
+    width: min(720px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    padding: 14px;
+    border: 1px solid var(--SmartThemeBorderColor);
+    border-radius: 10px;
+    background: var(--SmartThemeBlurTintColor, #18181d);
+}
+.mg-css-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+
+/* =====================================================
+   7. HOME / WELCOME SCREEN
+   (which logo picture to show stays in Custom CSS; only its size is set here)
+   ===================================================== */
+
+/* bigger logo in the top corner */
+body.mg-home .welcomePanel .welcomeHeaderLogo {
+    width: 72px !important;
+    height: 72px !important;
+    min-width: 72px !important;
+    min-height: 72px !important;
+    object-fit: contain !important;
+    flex: 0 0 72px !important;
+}
+
+/* hide the Help / GitHub / Discord group */
+body.mg-home #chat .welcomePanel .welcomeShortcuts {
+    display: none !important;
+}
+
+/* drop the empty row too when Recent Chats is collapsed */
+body.mg-home #chat .welcomePanel.recentHidden .welcomeHeader {
+    display: none !important;
+}
+
+/* hide the shortcut-button box under the Assistant */
+body.mg-home #chat > .mes[type="welcome_prompt"] {
+    display: none !important;
+}
+
+
+/* =====================================================
+   8. FUNCTION PANELS (side panels + top-bar drawers)
+   The pictures themselves stay in Custom CSS:
+     :root {
+         --function-bg: url("...");            panel background picture
+         --function-control-icon: url("...");  checked checkbox + slider thumb (one picture for both)
+         --function-slider-icon: url("...");   optional, slider thumb only
+         --function-checkbox-icon: url("..."); optional, checked checkbox only
+         --function-overlay: rgba(...);        optional, dark layer over the picture
+     }
+   index.js switches each half on only when its picture is set.
+
+   ":not(#sheld):not(#chat)" excludes nothing in practice; it is there for
+   weight, so these rules beat Moonlit's without help.
+   ===================================================== */
+
+/* ----- background picture ----- */
+
+body.mg-panel-bg .drawer-content:not(#sheld):not(#chat) {
+    background-image:
+        linear-gradient(
+            var(--function-overlay, rgba(15, 15, 18, 0.50)),
+            var(--function-overlay, rgba(15, 15, 18, 0.50))
+        ),
+        var(--function-bg) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* inner boxes */
+body.mg-panel-bg .drawer-content:not(#sheld):not(#chat) .inline-drawer-content {
+    background: rgba(15, 15, 18, 0.55) !important;
+}
+
+/* inputs, textareas, selects */
+body.mg-panel-bg .drawer-content:not(#sheld):not(#chat) :is(
+    input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+    textarea,
+    select
+) {
+    background-color: rgba(12, 12, 15, 0.72) !important;
+}
+
+/* ----- slider ----- */
+
+/* white track */
+body.mg-panel-slider .drawer-content:not(#sheld):not(#chat) input[type="range"] {
+    background: #ffffff !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+/* thumb = the icon (this also covers hover / focus / active) */
+body.mg-panel-slider .drawer-content:not(#sheld):not(#chat) input[type="range"]::-webkit-slider-thumb {
+    width: 35px !important;
+    height: 35px !important;
+    background-color: transparent !important;
+    background-image: var(--mg-slider-icon) !important;
+    background-size: 100% 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+/* ----- checkbox ----- */
+
+/* checked = keep the round base */
+body.mg-panel-check .drawer-content:not(#sheld):not(#chat) input[type="checkbox"]:checked {
+    position: relative !important;
+    overflow: visible !important;
+    border-radius: 50% !important;
+    background-color: var(--SmartThemeBodyColor) !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+/* remove the stock tick */
+body.mg-panel-check .drawer-content:not(#sheld):not(#chat) input[type="checkbox"]:checked::before {
+    content: none !important;
+}
+
+/* the icon sits over the circle and may spill past it */
+body.mg-panel-check .drawer-content:not(#sheld):not(#chat) input[type="checkbox"]:checked::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    width: 145% !important;
+    height: 145% !important;
+    transform: translate(-50%, -50%) !important;
+    background-image: var(--mg-check-icon) !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    pointer-events: none !important;
+}
+
+
+/* =====================================================
+   9. PICTURE ICONS — top bar + message box buttons
+   The pictures stay in Custom CSS, one variable per button:
+     :root {
+         --topbar-icon-preset / -api / -formatting / -worldinfo / -settings /
+                       -backgrounds / -extensions / -persona / -characters
+         --input-icon-options / -extensions / -impersonate / -send / -stop
+     }
+   index.js puts .mg-icon on each button whose picture is set, so a button
+   without one keeps its normal icon.
+   ===================================================== */
+
+/* sizes: override any of these in Custom CSS (:root { ... }) */
+:where(:root) {
+    --topbar-button-size: 44px;                         /* desktop / tablet */
+    --topbar-icon-size: 38px;
+    --topbar-mobile-height: 52px;                       /* phone */
+    --topbar-mobile-icon-size: clamp(36px, 10vw, 42px);
+    --topbar-icon-scale: 1.06;                          /* enlarges the whole picture, no cropping */
+    --input-icon-size: 40px;                            /* message box buttons */
+}
+
+/* ----- top bar: layout ----- */
+
+body.mg-topbar #top-settings-holder {
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+body.mg-topbar :is(
+    #top-settings-holder,
+    #top-settings-holder > .drawer,
+    #top-settings-holder > .drawer > .drawer-toggle,
+    #top-settings-holder > .drawer > .drawer-toggle > .drawer-icon
+) {
+    overflow: visible !important;
+}
+
+body.mg-topbar #top-settings-holder > .drawer,
+body.mg-topbar #top-settings-holder > .drawer > .drawer-toggle,
+body.mg-topbar #top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.mg-topbar #top-settings-holder > .drawer > .drawer-toggle,
+body.mg-topbar #top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+body.mg-topbar #top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {
+    width: var(--topbar-button-size) !important;
+    height: var(--topbar-button-size) !important;
+}
+
+/* ----- top bar: the picture ----- */
+
+/* hide the stock Font Awesome glyph */
+#top-settings-holder .drawer-icon.mg-icon {
+    font-size: 0 !important;
+}
+
+#top-settings-holder .drawer-icon.mg-icon::before {
+    content: "" !important;
+    display: block !important;
+    width: var(--topbar-icon-size) !important;
+    height: var(--topbar-icon-size) !important;
+    background-image: var(--mg-icon) !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;                /* whole picture visible, tall shapes are not cut */
+    transform: scale(var(--topbar-icon-scale)) !important;
+}
+
+/* ----- top bar: phone ----- */
+
+@media (max-width: 700px) {
+    /* icons may spill slightly past the bar without being clipped */
+    body.mg-topbar #top-bar {
+        overflow: visible !important;
+    }
+
+    body.mg-topbar #top-settings-holder {
+        width: 100% !important;
+        padding-inline: 3px !important;
+        gap: 0 !important;
+    }
+
+    /* every button gets an equal share of the bar */
+    body.mg-topbar #top-settings-holder > .drawer {
+        flex: 1 1 0 !important;
+        width: auto !important;
+        max-width: none !important;
+    }
+
+    body.mg-topbar #top-settings-holder > .drawer > .drawer-toggle {
+        width: 100% !important;
+    }
+
+    /* tap area fills the slot without widening the bar */
+    body.mg-topbar #top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {
+        width: 100% !important;
+        height: var(--topbar-mobile-height) !important;
+        flex: 0 0 auto !important;
+    }
+
+    #top-settings-holder .drawer-icon.mg-icon::before {
+        width: var(--topbar-mobile-icon-size) !important;
+        height: var(--topbar-mobile-icon-size) !important;
+    }
+}
+
+/* ----- top bar: desktop spacing ----- */
+
+@media (min-width: 701px) {
+    body.mg-topbar #top-settings-holder {
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+        column-gap: 12px !important;
+    }
+
+    body.mg-topbar #top-settings-holder > .drawer {
+        flex: 0 0 auto !important;
+    }
+}
+
+/* ----- message box buttons ----- */
+
+/* clear the button's own background and transform */
+:is(#options_button, #extensionsMenuButton, #mes_impersonate, #send_but, #mes_stop).mg-icon {
+    background-image: none !important;
+    background-color: transparent !important;
+    transform: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* same picture slot for every button */
+:is(#options_button, #extensionsMenuButton, #mes_impersonate, #send_but, #mes_stop).mg-icon::before {
+    content: "" !important;
+    display: block !important;
+    flex: 0 0 var(--input-icon-size) !important;
+    width: var(--input-icon-size) !important;
+    height: calc(var(--input-icon-size) + 10px) !important;
+    background-image: var(--mg-icon) !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
+}
+
+/* buttons without a picture take the panel's "Icon Color" (the top-bar icons
+   already read --Drawer-iconColor in the base layer). No !important, so the
+   Send button still lights up in the accent colour while typing. */
+body.mg-tools :is(#leftSendForm, #rightSendForm) > div:not(.mg-icon) {
+    color: var(--Drawer-iconColor);
+}
+
+/* hide the stock Stop icon */
+#mes_stop.mg-icon > i {
+    display: none !important;
+}
+
+
+/* =====================================================
+   10. FONT SCALE — interface fixed at 1, chat still follows the slider
+   ===================================================== */
+
+/* the whole interface stays at scale 1 */
+body.mg-font {
+    --mainFontSize: 15px;
+    font-size: 15px;
+}
+
+/* chat messages and the message box get SillyTavern's Font Scale back */
+body.mg-font #chat,
+body.mg-font #send_form {
+    --mainFontSize: calc(var(--fontScale) * 15px);
+    font-size: var(--mainFontSize);
+}
+
+
+/* =====================================================
+   11. PRESET PANEL — Parameters / Prompts tabs
+   From Chat Completion Tabs by Rivelle <rivelle.days@gmail.com>, AGPL-3.0
+   https://github.com/RivelleDays/SillyTavern-ChatCompletionTabs
+   Copied as is; only that extension's own settings-drawer rule is left out.
+   See THIRD-PARTY-NOTICES.md.
+   ===================================================== */
+
+/* -- Generic Tab System -- */
+
+/* Base Tab Content */
+.openai-tab-content {
+    display: none;
+    animation: fadeIn var(--animation-duration-slow, 0.2s) ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.openai-tab-content.active {
+    display: block;
+    margin-top: 0.8em;
+    margin-bottom: 0.8em;
+    width: 100%;
+}
+
+/* Base Tab Buttons */
+.openai-tab-buttons {
+    display: flex;
+    position: sticky;
+    top: 0;
+    margin-top: 0.25em;
+    padding: 2px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--SmartThemeBlurTintColor);
+    backdrop-filter: blur(calc(var(--SmartThemeBlurStrength, 10px)));
+    -webkit-backdrop-filter: blur(calc(var(--SmartThemeBlurStrength, 10px)));
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
+    z-index: 1000;
+    flex-wrap: wrap;
+}
+
+.openai-tab-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 2px;
+    padding: 6px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--SmartThemeBodyColor);
+    font-size: calc(var(--mainFontSize, 1rem) * 0.85);
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    opacity: 0.5;
+    transition: all var(--animation-duration-slow, 0.2s) ease-in-out;
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+.openai-tab-button:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
+.openai-tab-button.active {
+    background: color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
+    color: var(--SmartThemeBodyColor);
+    opacity: 1;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--SmartThemeBodyColor) 10%, transparent);
+}
+
+.openai-tab-button i {
+    font-size: 0.9em;
+}
+
+/* -- OpenAI Specific Styles -- */
+
+body:has(.openai-tab-buttons) {
+    #completion_prompt_manager .completion_prompt_manager_header {
+        margin-top: unset;
+    }
+    #completion_prompt_manager .completion_prompt_manager_header div {
+        margin-top: unset;
+    }
+}
+#movingUIreset {
+    width: fit-content;
+}
+
+
+/* =====================================================
+   12. SMALL FIXES — preset panel hint, Vertex heading
+   ===================================================== */
+
+/* "Click slider numbers to input manually." sits on the same line as the
+   round help icon, instead of being pushed up under the top bar */
+body.mg-tools #left-nav-panel #clickSlidersTips {
+    position: relative !important;
+    top: -4px !important;                 /* lines the text up with the help icon */
+    left: auto !important;
+    right: auto !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 44px !important;           /* keeps the text clear of the icon */
+    line-height: 1.2 !important;
+    text-align: center !important;
+}
+
+/* "(Express mode)" goes on its own line under the heading */
+body.mg-tools #vertexai_express_config > h4 > a {
+    display: block;
+    margin-top: 2px;
+}
+
+
+/* =====================================================
+   SLIDERS ON TOUCH SCREENS: only the handle can be dragged
+   -----------------------------------------------------
+   The bar itself ignores touches, so a finger that lands on it while
+   scrolling just scrolls the page. To change a value, drag the handle
+   (or type in the number box beside it).
+   ===================================================== */
+/* Only inside SillyTavern's own menus, panels and popups (the same list as in
+   moonlit-base.css): chat messages and other extensions' windows are left alone. */
+@media (pointer: coarse), (max-width: 1000px) {
+    body.mg-tools :where(#top-bar, #top-settings-holder, .drawer-content, #form_sheld, dialog, .popup, #dialogue_popup, #character_popup, #select_chat_popup, #floatingPrompt, #cfgConfig, #logprobsViewer, #completion_prompt_manager_popup, #options, #extensionsMenu) input[type="range"] { pointer-events: none; }
+    body.mg-tools :where(#top-bar, #top-settings-holder, .drawer-content, #form_sheld, dialog, .popup, #dialogue_popup, #character_popup, #select_chat_popup, #floatingPrompt, #cfgConfig, #logprobsViewer, #completion_prompt_manager_popup, #options, #extensionsMenu) input[type="range"]::-webkit-slider-thumb { pointer-events: auto; }
+    body.mg-tools :where(#top-bar, #top-settings-holder, .drawer-content, #form_sheld, dialog, .popup, #dialogue_popup, #character_popup, #select_chat_popup, #floatingPrompt, #cfgConfig, #logprobsViewer, #completion_prompt_manager_popup, #options, #extensionsMenu) input[type="range"]::-moz-range-thumb { pointer-events: auto; }
+}
