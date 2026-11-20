@@ -1154,6 +1154,7 @@ body.mg-home #chat > .mes[type="welcome_prompt"] {
          --function-control-icon: url("...");  checked checkbox + slider thumb (one picture for both)
          --function-slider-icon: url("...");   optional, slider thumb only
          --function-checkbox-icon: url("..."); optional, checked checkbox only
+         --function-slider-track: #hex;        optional, slider track colour (white if unset)
          --function-overlay: rgba(...);        optional, dark layer over the picture
      }
    index.js switches each half on only when its picture is set.
@@ -1192,9 +1193,9 @@ body.mg-panel-bg .drawer-content:not(#sheld):not(#chat) :is(
 
 /* ----- slider ----- */
 
-/* white track */
+/* track: colour from Custom CSS (--function-slider-track), white if unset */
 body.mg-panel-slider .drawer-content:not(#sheld):not(#chat) input[type="range"] {
-    background: #ffffff !important;
+    background: var(--function-slider-track, #ffffff) !important;
     box-shadow: none !important;
     filter: none !important;
 }
@@ -1375,6 +1376,12 @@ body.mg-topbar #top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {
 
     body.mg-topbar #top-settings-holder > .drawer {
         flex: 0 0 auto !important;
+    }
+
+    /* Moonlit fixes the Character button at ~1.45em, which squeezes its picture */
+    body.mg-topbar #rightNavHolder #unimportantYes {
+        width: var(--topbar-button-size) !important;
+        height: var(--topbar-button-size) !important;
     }
 }
 

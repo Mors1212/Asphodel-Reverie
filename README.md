@@ -147,6 +147,7 @@ To share a theme, give people two files: the UI theme `.json` and the exported p
 | --- | --- |
 | `--function-bg` | Background of the side panels and top bar drawers |
 | `--function-slider-icon` | Slider handle.  |
+| `--function-slider-track` | Colour of the slider track when the handle has a picture. Fill with a colour, not a picture |
 | `--function-checkbox-icon` | Ticked checkbox  |
 | `--topbar-icon-preset` | Top bar: AI Response Configuration |
 | `--topbar-icon-api` | Top bar: API Connections |
