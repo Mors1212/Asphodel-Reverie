@@ -23,12 +23,12 @@ Without a theme that sets pictures, you get the same layout with normal icons (i
 | --- | --- |
 | Picture icons in the top bar and around the message box | **Your UI theme** (Custom CSS) |
 | Background picture of the side panels | **Your UI theme** (Custom CSS) |
-| Picture on the slider handle and the ticked checkbox | **Your UI theme** (Custom CSS) |
+| Picture on the slider handle and the ticked checkbox, slider track colour | **Your UI theme** (Custom CSS) |
 | Logo on the welcome screen | **Your UI theme** (Custom CSS) |
-| Text colours, chat tint, blur, fonts | **Your UI theme** (the normal ST theme settings) |
+| Chat tint, blur, fonts, underline, shadow and border colours | **Your UI theme** (ST theme settings) |
 | Character and persona pictures | The cards and personas you have |
 | Layout of every page, card designs, icon sizes and positions | **Asphodel Reverie** |
-| Accent colours, top bar colour, icon colour, avatar settings | **Asphodel Reverie** (theme preset) |
+| Accent, background, top bar and icon colours; interface and chat text, italic and quote colours; user and AI message boxes; avatar settings | **Asphodel Reverie** (theme preset) |
 
 ## Screenshots
 
@@ -59,7 +59,8 @@ All taken on a phone, with my theme.
 
 - **Picture slots**: 9 top bar icons, 5 message box icons, the panel background, the slider handle and the ticked checkbox. Each slot is one line in Custom CSS.
 - **Nothing breaks when a slot is empty.** A button without a picture keeps its normal icon and takes the Icon Color from the settings.
-- **Theme presets**: accent colours, background colours, top bar colour, icon colour, avatar width and position, avatar border. Presets can be saved, exported and imported.
+- **Theme presets**, in two tabs. **Interface**: accent colours, background colours, top bar colour, icon colour, interface text. **Chat**: avatar width and position, avatar border, chat text, italic text, quote text, user and AI message boxes. Interface and chat text can be different colours. Presets can be saved, exported and imported.
+- **One place for text colours.** While the theme is on, Main Text, Italics Text, Quote Text, User Message and AI Message are set in Asphodel Reverie, so those rows are hidden in SillyTavern's Theme Colors.
 - **Presets follow the UI theme**: a preset with the same name as a UI theme is loaded when you switch to that theme.
 - **Notification styles**: choose a style for SillyTavern's pop-up notifications, or write, import and export your own CSS.
 
@@ -163,6 +164,7 @@ To share a theme, give people two files: the UI theme `.json` and the exported p
 | `--input-icon-impersonate` | Message box: Impersonate |
 | `--input-icon-send` | Message box: Send |
 | `--input-icon-stop` | Message box: Stop |
+| `--input-icon-gap` | Space between the message box buttons that have pictures. Fill a size, not a picture:  12px if left at `none`. |
 
 The welcome screen logo is set differently. In the template, find `.welcomeHeaderLogo` and replace `normal` with `url("your image link")`.
 
@@ -183,9 +185,8 @@ Everything is in **Extensions** → **Asphodel Reverie**.
 | Grid columns | 2 to 6 columns for the library and persona grids |
 | Notifications | The style of pop-up notifications. "Basic" is the default; "None" is ST's own look |
 | Theme preset | Save, load, import and export the values below |
-| Avatar width, Position | How the avatar sits behind the message header |
-| Hide avatar border | Removes the ring around avatars |
-| Colours | Primary and secondary theme colour, main and secondary background colour, top bar colour, icon colour, chat background colour |
+| Interface tab | Primary and secondary theme colour, main and secondary background colour, top bar colour, icon colour, interface text colour |
+| Chat tab | Avatar width and position, avatar border, chat text, italic text and quote text colour, user and AI message box colour |
 
 ## Good to know
 

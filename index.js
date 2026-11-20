@@ -37,20 +37,44 @@ const DEFAULT_LOOK = {
     customBgColor2: 'rgba(255, 255, 255, 0.05)',
     customTopBarColor: 'rgba(20, 20, 20, 0.83)',
     'Drawer-iconColor': 'rgba(255, 255, 255, 0.8)',
-    sheldBackgroundColor: 'rgba(0, 0, 0, 0.2)',
+    SmartThemeBodyColor: 'rgba(220, 220, 210, 1)',
+    arChatTextColor: 'rgba(220, 220, 210, 1)',
+    SmartThemeEmColor: 'rgba(145, 145, 145, 1)',
+    SmartThemeQuoteColor: 'rgba(146, 151, 196, 1)',
+    SmartThemeUserMesBlurTintColor: 'rgba(30, 30, 30, 0.9)',
+    SmartThemeBotMesBlurTintColor: 'rgba(30, 30, 30, 0.9)',
     customWhisperAvatarWidth: '50%',
     customWhisperAvatarAlign: 'top',
     hideAvatarBorder: false,
 };
+/* [key, label, hint, settings tab]. The SmartTheme* keys replace the same
+   colours in SillyTavern's Theme Colors while the theme is on (those rows are
+   hidden there). arChatTextColor is the chat's own copy of the main text colour. */
 const LOOK_COLORS = [
-    ['customThemeColor', 'Primary Theme Color', 'Highlights and accents across the interface'],
-    ['customThemeColor2', 'Secondary Theme Color', 'A second accent for special highlights'],
-    ['customBgColor1', 'Main Background Color', 'Menus and buttons'],
-    ['customBgColor2', 'Secondary Background Color', 'Quieter menus and buttons'],
-    ['customTopBarColor', 'Top Bar Color', 'The bar of icons at the top'],
-    ['Drawer-iconColor', 'Icon Color', 'Top bar and message box icons that have no picture'],
-    ['sheldBackgroundColor', 'Chat Background Color', 'The panel behind the chat messages'],
+    ['customThemeColor', 'Primary Theme Color', 'Highlights and accents across the interface', 'ui'],
+    ['customThemeColor2', 'Secondary Theme Color', 'A second accent for special highlights', 'ui'],
+    ['customBgColor1', 'Main Background Color', 'Menus and buttons', 'ui'],
+    ['customBgColor2', 'Secondary Background Color', 'Quieter menus and buttons', 'ui'],
+    ['customTopBarColor', 'Top Bar Color', 'The bar of icons at the top', 'ui'],
+    ['Drawer-iconColor', 'Icon Color', 'Top bar and message box icons that have no picture', 'ui'],
+    ['SmartThemeBodyColor', 'Interface Text', 'Text in menus, panels and popups', 'ui'],
+    ['arChatTextColor', 'Chat Text', 'Normal text in chat messages', 'chat'],
+    ['SmartThemeEmColor', 'Italic Text', '*Actions* and other italic text', 'chat'],
+    ['SmartThemeQuoteColor', 'Quote Text', '"Speech" in quotation marks', 'chat'],
+    ['SmartThemeUserMesBlurTintColor', 'User Message', 'The box behind your messages', 'chat'],
+    ['SmartThemeBotMesBlurTintColor', 'AI Message', "The box behind the character's messages", 'chat'],
 ];
+/* These colours used to come from SillyTavern's Theme Colors. When a preset
+   has no value for one (first run after updating, or an older preset), the
+   user's own SillyTavern colour is used instead of the built-in default. */
+const FROM_ST = {
+    SmartThemeBodyColor: 'main_text_color',
+    arChatTextColor: 'main_text_color',
+    SmartThemeEmColor: 'italics_text_color',
+    SmartThemeQuoteColor: 'quote_text_color',
+    SmartThemeUserMesBlurTintColor: 'user_mes_blur_tint_color',
+    SmartThemeBotMesBlurTintColor: 'bot_mes_blur_tint_color',
+};
 const WHISPER_ALIGN = ['top', 'center', 'bottom'];
 const PRESET_FILE_PREFIX = '[AR] ';
 
@@ -81,7 +105,7 @@ function getSettings() {
     if (!s.presets || typeof s.presets !== 'object' || Array.isArray(s.presets)) s.presets = {};
     delete s.presets[DEFAULT_PRESET]; // the built-in one always comes from the code
     if (s.activePreset !== DEFAULT_PRESET && !Object.hasOwn(s.presets, s.activePreset)) s.activePreset = DEFAULT_PRESET;
-    s.look = cleanLook(s.look, DEFAULT_LOOK);
+    s.look = cleanLook(s.look, lookBase());
     return s;
 }
 
@@ -415,6 +439,8 @@ async function exportToastStyle() {
      --function-control-icon  checked checkbox + slider thumb (one picture for both)
      --function-slider-icon   slider thumb only    (wins over the shared one)
      --function-checkbox-icon checked checkbox only (wins over the shared one)
+     --function-slider-track  slider track colour (white if unset)
+     --input-icon-gap         space between message box buttons (12px if unset)
      --topbar-icon-*          the nine top-bar icons
      --input-icon-*           the buttons around the message box
 
@@ -458,6 +484,18 @@ function syncCustomVars() {
         const source = has(own) ? own : (shared ? '--function-control-icon' : '');
         document.body.classList.toggle(cls, on && !!source);
         const wanted = on && source ? `var(${source})` : '';
+        if (document.body.style.getPropertyValue(target) !== wanted) {
+            if (wanted) document.body.style.setProperty(target, wanted);
+            else document.body.style.removeProperty(target);
+        }
+    }
+
+    // slider track colour + message box button gap: only when set and not "none"
+    for (const [own, target] of [
+        ['--function-slider-track', '--mg-slider-track'],
+        ['--input-icon-gap', '--mg-input-gap'],
+    ]) {
+        const wanted = on && has(own) ? `var(${own})` : '';
         if (document.body.style.getPropertyValue(target) !== wanted) {
             if (wanted) document.body.style.setProperty(target, wanted);
             else document.body.style.removeProperty(target);
@@ -787,6 +825,19 @@ function cleanLook(source, base) {
     return look;
 }
 
+/* Where a missing value comes from: the built-in default, or for the FROM_ST
+   colours the user's own SillyTavern colour. */
+function lookBase() {
+    const base = Object.assign({}, DEFAULT_LOOK);
+    const power = SillyTavern.getContext().powerUserSettings;
+    if (!power) return base;
+    for (const [key, name] of Object.entries(FROM_ST)) {
+        const value = safeCssValue(power[name], null);
+        if (value) base[key] = value;
+    }
+    return base;
+}
+
 function allPresets() {
     return Object.assign({ [DEFAULT_PRESET]: DEFAULT_LOOK }, getSettings().presets);
 }
@@ -838,7 +889,7 @@ function loadPreset(name, quiet) {
     if (!Object.hasOwn(presets, name)) return false;
     const s = getSettings();
     s.activePreset = name;
-    s.look = cleanLook(presets[name], DEFAULT_LOOK);
+    s.look = cleanLook(presets[name], lookBase());
     save();
     applyLook();
     syncSettingsUI();
@@ -911,7 +962,7 @@ async function importPresetFile(file) {
     if (Object.hasOwn(getSettings().presets, name) && !(await confirmBox(`A preset named "${name}" already exists. Replace it?`))) return;
 
     const s = getSettings();
-    s.presets[name] = cleanLook(data.settings, DEFAULT_LOOK);
+    s.presets[name] = cleanLook(data.settings, lookBase());
     save();
     loadPreset(name, true);
     toast('success', `Added preset "${name}".`);
@@ -1048,30 +1099,28 @@ function addSettingsPanel() {
                     <input type="file" id="mg_preset_file" accept=".json,application/json" hidden>
                     <div id="mg_preset_state" class="mg-set-state" hidden></div>
 
-                    <div class="mg-set-row mg-set-avatar">
-                        <label for="mg_whisper_width">Avatar width</label>
-                        <input type="text" id="mg_whisper_width" class="text_pole" placeholder="50%" autocomplete="off">
-                        <label for="mg_whisper_align">Position</label>
-                        <select id="mg_whisper_align" class="text_pole">
-                            <option value="top">Top</option>
-                            <option value="center">Center</option>
-                            <option value="bottom">Bottom</option>
-                        </select>
+                    <div class="mg-tabs" role="tablist">
+                        <div class="mg-tab menu_button" data-tab="ui" role="tab" tabindex="0">Interface</div>
+                        <div class="mg-tab menu_button" data-tab="chat" role="tab" tabindex="0">Chat</div>
                     </div>
-                    <label class="checkbox_label" for="mg_avatar_border"><input type="checkbox" id="mg_avatar_border"> <span>Hide avatar border</span></label>
 
-                    <div class="mg-set-colors">
-                        ${LOOK_COLORS.map(([key, label, hint]) => `
-                        <div class="mg-color" data-look="${key}">
-                            <b>${label}</b>
-                            <small>${hint}</small>
-                            <div class="mg-color-row">
-                                <toolcool-color-picker class="mg-color-pick" button-width="2.4rem" button-height="2.4rem" button-padding="0" color="${esc(DEFAULT_LOOK[key])}"></toolcool-color-picker>
-                                <input type="text" class="text_pole mg-color-hex" maxlength="60" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="${label}">
-                                <label class="mg-color-alpha"><span>Opacity</span><input type="range" min="0" max="100" step="1"></label>
-                                <span class="mg-color-num"></span>
-                            </div>
-                        </div>`).join('')}
+                    <div class="mg-tab-panel" data-panel="ui">
+                        <div class="mg-set-colors">${colorRows('ui')}</div>
+                    </div>
+
+                    <div class="mg-tab-panel" data-panel="chat">
+                        <div class="mg-set-row mg-set-avatar">
+                            <label for="mg_whisper_width">Avatar width</label>
+                            <input type="text" id="mg_whisper_width" class="text_pole" placeholder="50%" autocomplete="off">
+                            <label for="mg_whisper_align">Position</label>
+                            <select id="mg_whisper_align" class="text_pole">
+                                <option value="top">Top</option>
+                                <option value="center">Center</option>
+                                <option value="bottom">Bottom</option>
+                            </select>
+                        </div>
+                        <label class="checkbox_label" for="mg_avatar_border"><input type="checkbox" id="mg_avatar_border"> <span>Hide avatar border</span></label>
+                        <div class="mg-set-colors">${colorRows('chat')}</div>
                     </div>
 
                     <div class="mg-set-note">
@@ -1111,8 +1160,8 @@ function addSettingsPanel() {
         toast('info', 'This is how notifications look now.');
     });
 
-    const onTap = (id, fn) => {
-        const el = $(id);
+    const onTap = (target, fn) => {
+        const el = typeof target === 'string' ? $(target) : target;
         el.addEventListener('click', fn);
         el.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fn(); }
@@ -1225,7 +1274,37 @@ function addSettingsPanel() {
     $('mg_whisper_align').addEventListener('change', (event) => setLook('customWhisperAvatarAlign', event.target.value));
     $('mg_avatar_border').addEventListener('change', (event) => setLook('hideAvatarBorder', event.target.checked));
 
+    for (const el of document.querySelectorAll('#mg_settings .mg-tab')) onTap(el, () => showTab(el.dataset.tab));
+    showTab(openTab);
+
     syncSettingsUI();
+}
+
+/* The colour rows of one settings tab. */
+function colorRows(tab) {
+    return LOOK_COLORS.filter(([, , , t]) => t === tab).map(([key, label, hint]) => `
+                        <div class="mg-color" data-look="${key}">
+                            <b>${label}</b>
+                            <small>${esc(hint)}</small>
+                            <div class="mg-color-row">
+                                <toolcool-color-picker class="mg-color-pick" button-width="2.4rem" button-height="2.4rem" button-padding="0" color="${esc(DEFAULT_LOOK[key])}"></toolcool-color-picker>
+                                <input type="text" class="text_pole mg-color-hex" maxlength="60" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="${label}">
+                                <label class="mg-color-alpha"><span>Opacity</span><input type="range" min="0" max="100" step="1"></label>
+                                <span class="mg-color-num"></span>
+                            </div>
+                        </div>`).join('');
+}
+
+/* Interface / Chat tabs in the settings panel. The open tab is kept until reload. */
+let openTab = 'ui';
+function showTab(tab) {
+    openTab = tab;
+    for (const el of document.querySelectorAll('#mg_settings .mg-tab')) {
+        const on = el.dataset.tab === tab;
+        el.classList.toggle('mg-tab-on', on);
+        el.setAttribute('aria-selected', String(on));
+    }
+    for (const el of document.querySelectorAll('#mg_settings .mg-tab-panel')) el.hidden = el.dataset.panel !== tab;
 }
 
 const lookSync = { busy: false, timer: 0 };
@@ -1259,7 +1338,7 @@ function syncLookState() {
     if (!$('mg_settings')) return;
     const s = getSettings();
     const isDefault = s.activePreset === DEFAULT_PRESET;
-    const dirty = !sameLook(s.look, cleanLook(allPresets()[s.activePreset], DEFAULT_LOOK)); // presets saved before a value existed get its default
+    const dirty = !sameLook(s.look, cleanLook(allPresets()[s.activePreset], lookBase())); // presets saved before a value existed get its default
 
     $('mg_preset_save').classList.toggle('mg-locked', isDefault || !dirty);
     $('mg_preset_delete').classList.toggle('mg-locked', isDefault);
