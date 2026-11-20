@@ -1419,17 +1419,36 @@ body.mg-tools :is(#leftSendForm, #rightSendForm) > div:not(.mg-icon) {
    10. FONT SCALE — interface fixed at 1, chat still follows the slider
    ===================================================== */
 
-/* the whole interface stays at scale 1 */
-body.mg-font {
-    --mainFontSize: 15px;
-    font-size: 15px;
+/* keep the slider's value for the chat before it is locked below.
+   SillyTavern puts --fontScale on <html>, so this is read there. */
+:root {
+    --ar-chatScale: var(--fontScale, 1);
 }
 
-/* chat messages and the message box get SillyTavern's Font Scale back */
+/* the whole interface stays at scale 1: <html> as well as <body>, and
+   --fontScale itself, so no SillyTavern or base rule that reads it can grow */
+:root:has(body.mg-font) {
+    --mainFontSize: 15px;
+}
+
+body.mg-font {
+    --fontScale: 1;
+    --mainFontSize: 15px;
+    font-size: 15px;
+    --messageTextFontSize: 15px;
+    --messageLineHeight: calc(15px + .5rem);
+}
+
+/* chat messages and the message box get SillyTavern's Font Scale back.
+   The base layer fixes message text at 15px and works out the line height
+   on :root, so both are set again here from the scaled size. */
 body.mg-font #chat,
 body.mg-font #send_form {
-    --mainFontSize: calc(var(--fontScale) * 15px);
+    --fontScale: var(--ar-chatScale);
+    --mainFontSize: calc(var(--ar-chatScale) * 15px);
     font-size: var(--mainFontSize);
+    --messageTextFontSize: var(--mainFontSize);
+    --messageLineHeight: calc(var(--mainFontSize) + .5rem);
 }
 
 
